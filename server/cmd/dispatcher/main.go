@@ -28,16 +28,18 @@ func (h *MinHeap) Pop() interface{} {
 
 // Worker handles incoming times and waits until the minimum time is reached
 type Worker struct {
+	id       int
 	minHeap  *MinHeap
 	mu       sync.Mutex
 	newValue chan int64
 	stop     chan struct{}
 }
 
-func NewWorker() *Worker {
+func NewWorker(id int) *Worker {
 	h := &MinHeap{}
 	heap.Init(h)
 	return &Worker{
+		id:       id,
 		minHeap:  h,
 		newValue: make(chan int64),
 		stop:     make(chan struct{}),
@@ -53,6 +55,8 @@ func (w *Worker) Stop() {
 }
 
 func (w *Worker) run() {
+	count := 0
+
 	for {
 		w.mu.Lock()
 		for w.minHeap.Len() == 0 {
@@ -63,6 +67,7 @@ func (w *Worker) run() {
 				heap.Push(w.minHeap, newTime)
 				w.mu.Unlock()
 			case <-w.stop:
+				fmt.Printf("Worker %d stopping\n", w.id)
 				return
 			}
 			w.mu.Lock()
@@ -78,8 +83,8 @@ func (w *Worker) run() {
 				w.mu.Lock()
 				if w.minHeap.Len() > 0 && (*w.minHeap)[0] == minTime {
 					heap.Pop(w.minHeap)
-
-					fmt.Printf("Time reached: %v\n", minTime)
+					count++
+					fmt.Printf("Worker %d: Time reached: %v\n", w.id, minTime)
 				}
 				w.mu.Unlock()
 			case newTime := <-w.newValue:
@@ -87,21 +92,64 @@ func (w *Worker) run() {
 				heap.Push(w.minHeap, newTime)
 				w.mu.Unlock()
 			case <-w.stop:
+				fmt.Printf("Worker %d stopping\n", w.id)
 				return
 			}
 		} else {
 			w.mu.Lock()
 			if w.minHeap.Len() > 0 && (*w.minHeap)[0] == minTime {
 				heap.Pop(w.minHeap)
-				fmt.Printf("Time reached: %v\n", minTime)
+				fmt.Printf("Worker %d: Time reached: %v\n", w.id, minTime)
 			}
 			w.mu.Unlock()
 		}
 	}
 }
 
+type Dispatcher struct {
+	workers []*Worker
+	current int
+	mu      sync.Mutex
+	wg      sync.WaitGroup
+}
+
+func NewDispatcher(numWorkers int) *Dispatcher {
+	workers := make([]*Worker, numWorkers)
+	for i := 0; i < numWorkers; i++ {
+		workers[i] = NewWorker(i)
+	}
+	return &Dispatcher{
+		workers: workers,
+	}
+}
+
+func (d *Dispatcher) Start() {
+	for _, worker := range d.workers {
+		d.wg.Add(1)
+		go func(w *Worker) {
+			defer d.wg.Done()
+			w.run()
+		}(worker)
+	}
+}
+
+func (d *Dispatcher) AddTime(unixTime int64) {
+	d.mu.Lock()
+	worker := d.workers[d.current]
+	d.current = (d.current + 1) % len(d.workers)
+	d.mu.Unlock()
+	worker.AddTime(unixTime)
+}
+
+func (d *Dispatcher) Stop() {
+	for _, worker := range d.workers {
+		worker.Stop()
+	}
+	d.wg.Wait() // Wait for all workers to finish
+}
+
 func main() {
-	worker := NewWorker()
+	numWorkers := 4 // Number of workers
 
 	ticker := time.NewTicker(time.Second)
 
@@ -115,13 +163,15 @@ func main() {
 		}
 	}()
 
-	go worker.run()
+	dispatcher := NewDispatcher(numWorkers)
+
+	dispatcher.Start()
 
 	// Example usage
-	worker.AddTime(time.Now().Add(12 * time.Second).Unix())
-	worker.AddTime(time.Now().Add(5 * time.Second).Unix())
-	worker.AddTime(time.Now().Add(3 * time.Second).Unix())
+	for i := 0; i < 100; i++ {
+		dispatcher.AddTime(time.Now().Add(time.Duration(5) * time.Second).Unix())
+	}
 
-	time.Sleep(20 * time.Second)
-	worker.Stop()
+	time.Sleep(1 * time.Minute)
+	dispatcher.Stop()
 }

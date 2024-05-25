@@ -1,6 +1,6 @@
 'use client'
 
-import { addDaysToDate } from '@/commons/date'
+import { addDaysToDate } from '@/commons/dateTime'
 import { shortMonthNames } from '@/constants/date'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { useEffect, useState } from 'react'
@@ -17,7 +17,7 @@ export function CalendarSettings({
             setSelectedDate(newInitialDate)
             return {
                 initialDate: newInitialDate,
-                finalDate: addDaysToDate(prev.finalDate, increment),
+                finalDate: addDaysToDate(newInitialDate, increment),
             }
         })
     }
@@ -25,7 +25,7 @@ export function CalendarSettings({
     useEffect(() => {
         setDateRange({
             initialDate: selectedDate,
-            finalDate: addDaysToDate(selectedDate, 7),
+            finalDate: addDaysToDate(selectedDate, 6),
         })
     }, [selectedDate])
 

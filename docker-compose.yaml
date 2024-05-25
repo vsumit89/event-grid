@@ -1,0 +1,24 @@
+version: '3.0'
+
+services:
+  db:
+    image: postgres:14.2-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./volumes/postgresql:/var/lib/postgresql/data/
+      - ./server/init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test: 'pg_isready -U "postgres" -d "eventgrid"'
+      timeout: 2s
+    networks:
+      - eventgrid
+
+
+networks:
+  eventgrid:

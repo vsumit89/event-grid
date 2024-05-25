@@ -1,6 +1,6 @@
 'use client'
 
-import { areSameDate } from '@/commons/date'
+import { areSameDate } from '@/commons/dateTime'
 import { dayNames, monthNames } from '@/constants/date'
 import { CaretLeft, CaretRight } from '@phosphor-icons/react'
 import { memo, useEffect, useState } from 'react'

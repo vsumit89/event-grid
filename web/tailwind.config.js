@@ -19,6 +19,7 @@ module.exports = {
                 'secondary-background': '#404040',
                 'primary-label': '#FCFCFD',
                 'button-primary': '#1a1a1a',
+                'modal-background': '#1a1a1a',
             },
         },
     },
