@@ -1,8 +1,10 @@
 package userHandlers
 
 import (
+	"fmt"
 	"net/http"
 	"server/internal/services"
+	"server/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -17,12 +19,16 @@ func NewHandler(userSvc services.IUserSvc) *Handler {
 	}
 }
 
-func (h *Handler) GetRoutes() http.Handler {
-	router := chi.NewRouter()
+func (h *Handler) GetRoutes(router *chi.Mux) {
+	router.Get("/users", h.GetUsers)
+}
 
-	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello world"))
-	})
+func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
 
-	return router
+	logger.Info("retrieving users")
+	fmt.Println(h.userSvc)
+	// TODO: get users from the user service
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("successfully retrieved users"))
 }

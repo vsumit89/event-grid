@@ -11,6 +11,8 @@ import (
 	"server/internal/handlers"
 	db "server/internal/infrastructure/database"
 	"server/internal/infrastructure/transport"
+	"server/internal/repository"
+	"server/internal/services"
 	"server/pkg/logger"
 )
 
@@ -60,8 +62,20 @@ func main() {
 
 	logger.Info("successfully migrated the database")
 
+	// instantiating the repositories, services and handlers
+	userRepoSvc := repository.NewUserRepository(dbClient)
+
+	userSvc := services.NewUserSvc(&services.UserSvcOptions{
+		Repository: userRepoSvc,
+	})
+
+	// deps contains the dependencies for the handlers
+	deps := handlers.Container{
+		UserSvc: userSvc,
+	}
+
 	// getting all the handlers
-	router := handlers.GetRoutes()
+	router := handlers.GetRoutes(&deps)
 
 	httpServer := transport.NewHTTPServer(&cfg.Server, router)
 	if err != nil {
