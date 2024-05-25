@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+	"server/internal/commons"
 	db "server/internal/infrastructure/database"
 	"server/internal/models"
 
@@ -13,6 +15,8 @@ import (
 type IUserRepository interface {
 	CreateUser(user *models.User) (*models.User, error)
 	GetUserByID(id uint) (*models.User, error)
+	GetUserByEmail(email string) (*models.User, error)
+	UpdateUser(id uint, user *models.User) (*models.User, error)
 }
 
 type userPgRepoImpl struct {
@@ -42,4 +46,26 @@ func (u *userPgRepoImpl) GetUserByID(id uint) (*models.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (u *userPgRepoImpl) GetUserByEmail(email string) (*models.User, error) {
+	var user models.User
+	err := u.db.Where("email = ?", email).First(&user).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, commons.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (u *userPgRepoImpl) UpdateUser(id uint, user *models.User) (*models.User, error) {
+	err := u.db.Model(&models.User{}).Where("id = ?", id).Updates(user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

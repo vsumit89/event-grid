@@ -7,6 +7,7 @@ import (
 	"strings"
 	"syscall"
 
+	"server/internal/commons"
 	"server/internal/config"
 	"server/internal/handlers"
 	db "server/internal/infrastructure/database"
@@ -62,6 +63,8 @@ func main() {
 
 	logger.Info("successfully migrated the database")
 
+	jwtSvc := commons.NewJWTService(cfg.JWT)
+
 	// instantiating the repositories, services and handlers
 	userRepoSvc := repository.NewUserRepository(dbClient)
 
@@ -72,6 +75,7 @@ func main() {
 	// deps contains the dependencies for the handlers
 	deps := handlers.Container{
 		UserSvc: userSvc,
+		JWTSvc:  jwtSvc,
 	}
 
 	// getting all the handlers

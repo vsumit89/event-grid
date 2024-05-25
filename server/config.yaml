@@ -8,3 +8,8 @@ db:
   password: "postgres"
   database: "eventgrid"
   sslmode: "disable"
+
+jwt:
+  secret: "secret"
+  ttl: 1
+  unit: days # days, hours, minutes

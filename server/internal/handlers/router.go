@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"server/internal/commons"
 	"server/internal/handlers/userHandlers"
 	"server/internal/services"
 
@@ -11,6 +12,7 @@ import (
 // Container is a struct that contains all the services dependencies for the router
 type Container struct {
 	UserSvc services.IUserSvc
+	JWTSvc  *commons.JwtSvc
 }
 
 func GetRoutes(c *Container) http.Handler {
@@ -20,7 +22,13 @@ func GetRoutes(c *Container) http.Handler {
 
 	router.Mount("/api/v1", v1Router)
 
-	userHandlers.NewHandler(c.UserSvc).GetRoutes(v1Router)
+	userRouter := userHandlers.NewHandler(c.UserSvc).GetRoutes()
+
+	authRouter := userHandlers.NewAuthHandler(c.UserSvc, c.JWTSvc).AuthRoutes()
+
+	v1Router.Mount("/users", userRouter)
+
+	v1Router.Mount("/auth", authRouter)
 
 	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
