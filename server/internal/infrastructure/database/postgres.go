@@ -57,7 +57,11 @@ func (p *pgDBImpl) getDbUrl(cfg *config.DBConfig) string {
 // Migrate method is used to migrate the database
 // it creates the table if it doesn't exist and it adds / removes / updates columns if needed
 func (p *pgDBImpl) Migrate() error {
-	return p.db.AutoMigrate(&models.User{})
+	return p.db.AutoMigrate(
+		&models.User{},
+		&models.Event{},
+		&models.EventAttendees{},
+	)
 }
 
 // GetClient method is used to get the database client

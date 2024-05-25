@@ -68,14 +68,22 @@ func main() {
 	// instantiating the repositories, services and handlers
 	userRepoSvc := repository.NewUserRepository(dbClient)
 
+	eventRepoSvc := repository.NewEventsRepository(dbClient)
+
 	userSvc := services.NewUserSvc(&services.UserSvcOptions{
 		Repository: userRepoSvc,
 	})
 
+	eventSvc := services.NewEventSvc(&services.EventSvcOptions{
+		EventRepository: eventRepoSvc,
+		UserRepository:  userRepoSvc,
+	})
+
 	// deps contains the dependencies for the handlers
 	deps := handlers.Container{
-		UserSvc: userSvc,
-		JWTSvc:  jwtSvc,
+		UserSvc:  userSvc,
+		JWTSvc:   jwtSvc,
+		EventSvc: eventSvc,
 	}
 
 	// getting all the handlers

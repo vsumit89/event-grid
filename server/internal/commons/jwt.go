@@ -8,6 +8,10 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+var (
+	ErrTokenNotFound = errors.New("bearer token not found")
+)
+
 type JwtSvc struct {
 	SecretKey string
 	TTL       time.Duration
