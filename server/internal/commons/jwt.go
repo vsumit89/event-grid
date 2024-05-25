@@ -10,6 +10,9 @@ import (
 
 var (
 	ErrTokenNotFound = errors.New("bearer token not found")
+	ErrTokenExpired  = errors.New("access token expired")
+
+	ErrTokenInvalid = errors.New("invalid token")
 )
 
 type JwtSvc struct {
@@ -75,7 +78,7 @@ func (j *JwtSvc) ValidateToken(tokenString string) (*CustomClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, errors.New("unexpected signing method")
 		}
-		return j.SecretKey, nil
+		return []byte(j.SecretKey), nil
 	})
 
 	if err != nil {

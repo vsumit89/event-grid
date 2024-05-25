@@ -2,41 +2,30 @@ package middlewares
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"server/internal/commons"
 	"server/pkg/utils"
-	"strings"
+	"time"
 )
-
-// parse the Bearer token from the header
-func parseToken(r *http.Request) (string, error) {
-	token := r.Header.Get("Authorization")
-
-	if token == "" {
-		return "", commons.ErrTokenNotFound
-	}
-
-	tokenDetails := strings.Split(token, " ")
-
-	if len(tokenDetails) < 2 || tokenDetails[0] != "Bearer" {
-		return "", commons.ErrTokenNotFound
-	}
-
-	return tokenDetails[1], nil
-}
 
 func JWTAuth(svc *commons.JwtSvc) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token, err := parseToken(r)
+			cookie, err := r.Cookie("access_token")
 			if err != nil {
-				utils.SendError(w, http.StatusUnauthorized, err)
+				utils.SendError(w, http.StatusUnauthorized, errors.New("you are unauthorized user, please login"))
 				return
 			}
 
-			claims, err := svc.ValidateToken(token)
+			claims, err := svc.ValidateToken(cookie.Value)
 			if err != nil {
-				utils.SendError(w, http.StatusUnauthorized, err)
+				utils.SendError(w, http.StatusUnauthorized, commons.ErrTokenInvalid)
+				return
+			}
+
+			if time.Now().Unix() > claims.ExpiresAt {
+				utils.SendError(w, http.StatusUnauthorized, commons.ErrTokenExpired)
 				return
 			}
 
