@@ -18,6 +18,7 @@
 
 body {
     background-color: black;
+    font-family: 'Sora', sans-serif;
 }
 
 @layer utilities {

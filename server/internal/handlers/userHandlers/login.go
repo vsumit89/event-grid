@@ -49,6 +49,10 @@ func (h *AuthHandler) loginUser(w http.ResponseWriter, r *http.Request) {
 		Value:    token,
 		Expires:  time.Now().Add(expiresAfter),
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Secure:   false,
+		Domain:   "localhost:8080",
+		Path:     "/",
 	})
 
 	utils.SendJSON(w, http.StatusOK, map[string]interface{}{

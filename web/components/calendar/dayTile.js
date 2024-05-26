@@ -13,11 +13,11 @@ export function DayTile({ startTime, parts = 2, toggleForm }) {
             {sections.slice(0, sections.length - 1).map((_, index) => (
                 <div
                     key={index}
-                    className={`text-xs w-full h-full text-center justify-center items-center ${activeIndex === index ? 'text-black bg-white rounded-md' : 'text-white'}`}
+                    className={`text-xs w-full h-full text-center justify-center items-center text-white`}
+                    // ${activeIndex === index ? 'text-black bg-white rounded-md' : 'text-white'}
                     onMouseEnter={() => setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                     onClick={() => {
-                        console.log('what is this toggle')
                         toggleForm()
                     }}
                 >

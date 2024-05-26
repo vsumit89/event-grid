@@ -85,5 +85,12 @@ func (u *userSvcImpl) Login(email, password string) (*models.User, error) {
 }
 
 func (u *userSvcImpl) GetUserByID(id uint) (*models.User, error) {
-	return nil, nil
+	user, err := u.userRepo.GetUserByID(id)
+	if err != nil {
+		if err == commons.ErrUserNotFound {
+			return nil, commons.ErrUserNotFound
+		}
+		return nil, commons.ErrInternalServer
+	}
+	return user, nil
 }

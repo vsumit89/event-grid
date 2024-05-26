@@ -57,9 +57,9 @@ export function splitMeetings(meetings) {
     const daysWithMeetings = {}
 
     meetings.forEach((meeting) => {
-        const startDate = new Date(meeting.startTime)
-        const endDate = new Date(meeting.endTime)
-
+        console.log(meeting)
+        const startDate = new Date(meeting.start)
+        const endDate = new Date(meeting.end)
         const startDay = startDate.toDateString()
         const endDay = endDate.toDateString()
 
@@ -151,4 +151,32 @@ export function formatDateRange(dateRange) {
     formattedRange += `${finalDate.getDate()} ${shortMonthNames[finalDate.getMonth()]} ${finalDate.getFullYear()}`
 
     return formattedRange
+}
+
+
+export function getDateString(date) {
+    let month = date.getMonth() + 1
+    let monthStr;
+    if (month < 10) {
+        monthStr = '0' + month
+    } else {
+        monthStr = `${month}`
+    }
+
+    let day = date.getDate()
+
+    let dateStr;
+    if (day < 10) {
+        dateStr = '0' + day
+    } else {
+        dateStr = `${day}`
+    }
+
+    console.log({
+        date,
+        monthStr,
+        dateStr,
+        year: date.getFullYear()
+    })
+    return `${date.getFullYear()}-${monthStr}-${dateStr}`
 }

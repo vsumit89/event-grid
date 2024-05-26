@@ -1,17 +1,17 @@
 package userHandlers
 
 import (
-	"fmt"
 	"net/http"
 	"server/internal/commons"
+	"server/internal/handlers/middlewares"
 	"server/internal/services"
-	"server/pkg/logger"
 
 	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
 	userSvc services.IUserSvc
+	jwtSvc  *commons.JwtSvc
 }
 
 type AuthHandler struct {
@@ -19,9 +19,10 @@ type AuthHandler struct {
 	jwtSvc  *commons.JwtSvc
 }
 
-func NewHandler(userSvc services.IUserSvc) *Handler {
+func NewHandler(userSvc services.IUserSvc, jwt *commons.JwtSvc) *Handler {
 	return &Handler{
 		userSvc: userSvc,
+		jwtSvc:  jwt,
 	}
 }
 
@@ -35,7 +36,9 @@ func NewAuthHandler(userSvc services.IUserSvc, jwtSvc *commons.JwtSvc) *AuthHand
 func (h *Handler) GetRoutes() http.Handler {
 	userRouter := chi.NewRouter()
 
-	userRouter.Get("/", h.getUsers)
+	userRouter.Use(middlewares.JWTAuth(h.jwtSvc))
+
+	userRouter.Get("/profile", h.getUser)
 
 	return userRouter
 }
@@ -48,14 +51,4 @@ func (h *AuthHandler) AuthRoutes() http.Handler {
 	authRouter.Post("/login", h.loginUser)
 
 	return authRouter
-}
-
-func (h *Handler) getUsers(w http.ResponseWriter, r *http.Request) {
-
-	logger.Info("retrieving users")
-	fmt.Println(h.userSvc)
-	// TODO: get users from the user service
-
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("successfully retrieved users"))
 }
