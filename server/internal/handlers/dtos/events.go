@@ -24,6 +24,10 @@ func (e *EventDTO) Validate() error {
 		return errors.New("description must be at least 10 characters")
 	}
 
+	if e.StartTime.IsZero() || e.EndTime.IsZero() {
+		return errors.New("start and end time cannot be empty")
+	}
+
 	if e.StartTime.After(e.EndTime) {
 		return errors.New("start time cannot be after end time")
 	}

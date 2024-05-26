@@ -9,7 +9,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-
 export default function LoginPage() {
     const [loading, setLoading] = useState(false)
 
@@ -115,10 +114,7 @@ export default function LoginPage() {
 
         try {
             // handles login
-            await login(
-                loginData.email.value,
-                loginData.password.value
-            )
+            await login(loginData.email.value, loginData.password.value)
 
             // window.location.href = '/'
             router.push('/')

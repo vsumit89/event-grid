@@ -3,7 +3,7 @@
 import { generateTimeParts } from '@/commons/dateTime'
 import { useState } from 'react'
 
-export function DayTile({ startTime, parts = 2, toggleForm }) {
+export function DayTile({ startTime, parts = 2, toggleForm, date }) {
     let sections = generateTimeParts(startTime, parts)
 
     const [activeIndex, setActiveIndex] = useState(null)
@@ -18,7 +18,7 @@ export function DayTile({ startTime, parts = 2, toggleForm }) {
                     onMouseEnter={() => setActiveIndex(index)}
                     onMouseLeave={() => setActiveIndex(null)}
                     onClick={() => {
-                        toggleForm()
+                        toggleForm(date, sections[index], sections[index + 1])
                     }}
                 >
                     {activeIndex === index

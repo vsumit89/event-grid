@@ -40,6 +40,8 @@ func (h *Handler) GetRoutes() http.Handler {
 
 	userRouter.Get("/profile", h.getUser)
 
+	userRouter.Get("/search", h.searchUsers)
+
 	return userRouter
 }
 

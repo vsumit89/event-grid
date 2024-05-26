@@ -12,6 +12,7 @@ type IUserSvc interface {
 	RegisterUser(user *models.User) (*models.User, error)
 	Login(email, password string) (*models.User, error)
 	GetUserByID(id uint) (*models.User, error)
+	GetUsers(userID uint, query string, limit int) ([]models.User, error)
 }
 
 type UserSvcOptions struct {
@@ -93,4 +94,8 @@ func (u *userSvcImpl) GetUserByID(id uint) (*models.User, error) {
 		return nil, commons.ErrInternalServer
 	}
 	return user, nil
+}
+
+func (u *userSvcImpl) GetUsers(userID uint, query string, limit int) ([]models.User, error) {
+	return u.userRepo.GetUsers(userID, query, limit)
 }

@@ -7,6 +7,7 @@ import {
 import { dayNames } from '@/constants/date'
 import { DayTile } from './dayTile'
 import { useEffect, useState } from 'react'
+import { EventTile } from '../events/eventTile'
 
 export function CalendarGrid({
     startDate,
@@ -14,7 +15,8 @@ export function CalendarGrid({
     toggleForm,
     timeFormat,
     openDate,
-    eventData
+    eventData,
+    showEventDetails,
 }) {
     const [dateList, setDateList] = useState([])
 
@@ -35,7 +37,6 @@ export function CalendarGrid({
     useEffect(() => {
         setEvents(splitMeetings(eventData))
     }, [eventData])
-
 
     return (
         <div className="flex h-[90vh] overflow-y-scroll w-full">
@@ -71,38 +72,30 @@ export function CalendarGrid({
                                 }}
                             ></hr>
                             {events[stringFormatDate] &&
-                                events[stringFormatDate].map(
-                                    (meeting) => {
-                                        const meetingDate = new Date(
-                                            meeting.start
-                                        )
+                                events[stringFormatDate].map((meeting) => {
+                                    const meetingDate = new Date(meeting.start)
 
-                                        const topPos =
-                                            meetingDate.getHours() * 20 * 4 +
-                                            (meetingDate.getMinutes() *
-                                                20 *
-                                                4) /
-                                                60
+                                    const topPos =
+                                        meetingDate.getHours() * 20 * 4 +
+                                        (meetingDate.getMinutes() * 20 * 4) / 60
 
-                                        const numMinute = minuteDiffBetweenTime(
-                                            meeting.start,
-                                            meeting.end
-                                        )
+                                    const numMinute = minuteDiffBetweenTime(
+                                        meeting.start,
+                                        meeting.end
+                                    )
 
-                                        return (
-                                            <div
-                                                key={meeting.start}
-                                                className={`absolute bg-white text-sm mt-16 w-full rounded-md flex flex-col items-center justify-center`}
-                                                style={{
-                                                    top: topPos,
-                                                    height: numMinute * (4 / 3),
-                                                }}
-                                            >
-                                                <span>{meeting.title}</span>
-                                            </div>
-                                        )
-                                    }
-                                )}
+                                    return (
+                                        <EventTile
+                                            key={meeting.id}
+                                            event={meeting}
+                                            top={topPos}
+                                            height={numMinute * (4 / 3)}
+                                            onClick={() => {
+                                                showEventDetails(meeting)
+                                            }}
+                                        />
+                                    )
+                                })}
                             <div
                                 className="h-16 flex flex-col items-center justify-center cursor-pointer text-white opacity-70 hover:opacity-100"
                                 onClick={() => {
@@ -125,6 +118,7 @@ export function CalendarGrid({
                                     <DayTile
                                         startTime={hour}
                                         toggleForm={toggleForm}
+                                        date={date}
                                     ></DayTile>
                                 </div>
                             ))}
