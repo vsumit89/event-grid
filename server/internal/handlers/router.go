@@ -9,6 +9,7 @@ import (
 	"server/internal/services"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 // Container is a struct that contains all the services dependencies for the router
@@ -24,11 +25,20 @@ func GetRoutes(c *Container) http.Handler {
 	router.Use(middlewares.Logging)
 	router.Use(middlewares.Recoverer)
 
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	v1Router := chi.NewRouter()
 
 	router.Mount("/api/v1", v1Router)
 
-	userRouter := userHandlers.NewHandler(c.UserSvc).GetRoutes()
+	userRouter := userHandlers.NewHandler(c.UserSvc, c.JWTSvc).GetRoutes()
 
 	authRouter := userHandlers.NewAuthHandler(c.UserSvc, c.JWTSvc).AuthRoutes()
 

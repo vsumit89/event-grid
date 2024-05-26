@@ -15,7 +15,7 @@ export function CalendarSettings({
     numDays,
     setNumDays,
     setTimeFormat,
-    timeFormat
+    timeFormat,
 }) {
     const updateDateRange = (increment) => {
         setDateRange((prev) => {
@@ -64,9 +64,9 @@ export function CalendarSettings({
             </div>
             <div className="flex items-center gap-2">
                 {' '}
-                <div className="flex gap-4 py-1 px-2 border border-primary-border rounded-md text-sm text-primary-text hover:border-white">
+                <div className="flex gap-1 p-1 border border-primary-border rounded-md text-sm text-primary-text hover:border-white">
                     <button
-                        className={`${timeFormat === 12 ? 'bg-secondary-background px-2 py-1 rounded-md text-white' : 'bg-transparent'}`}
+                        className={`${timeFormat === 12 ? 'bg-secondary-background' : 'bg-transparent'} px-2 py-1 rounded-md text-white`}
                         onClick={() => {
                             setTimeFormat(12)
                         }}
@@ -74,7 +74,7 @@ export function CalendarSettings({
                         12h
                     </button>
                     <button
-                        className={`${timeFormat === 24? 'bg-secondary-background px-2 py-1 rounded-md text-white' : 'bg-transparent'}`}
+                        className={`${timeFormat === 24 ? 'bg-secondary-background' : 'bg-transparent'} px-2 py-1 rounded-md text-white`}
                         onClick={() => {
                             setTimeFormat(24)
                         }}
@@ -82,9 +82,9 @@ export function CalendarSettings({
                         24h
                     </button>
                 </div>
-                <div className="flex gap-4 py-1 px-2 border border-primary-border rounded-md text-sm text-primary-text hover:border-white">
+                <div className="flex gap-1 p-1 border border-primary-border rounded-md text-sm text-primary-text hover:border-white">
                     <button
-                        className={`${numDays + 1 === 1 ? 'bg-secondary-background px-2 py-1 rounded-md text-white' : 'bg-transparent'}`}
+                        className={`${numDays + 1 === 1 ? 'bg-secondary-background' : 'bg-transparent'} px-2 py-1 rounded-md text-white`}
                         onClick={() => {
                             setNumDays(0)
                         }}
@@ -92,7 +92,7 @@ export function CalendarSettings({
                         Daily
                     </button>
                     <button
-                        className={`${numDays + 1 === 7 ? 'bg-secondary-background px-2 py-1 rounded-md text-white' : 'bg-transparent'}`}
+                        className={`${numDays + 1 === 7 ? 'bg-secondary-background' : 'bg-transparent'} px-2 py-1 rounded-md text-white`}
                         onClick={() => {
                             setNumDays(6)
                         }}

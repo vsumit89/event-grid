@@ -20,6 +20,7 @@ module.exports = {
                 'primary-label': '#FCFCFD',
                 'button-primary': '#1a1a1a',
                 'modal-background': '#1a1a1a',
+                'error-text': '#ff4c4c',
             },
         },
     },

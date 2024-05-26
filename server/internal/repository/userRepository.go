@@ -21,6 +21,8 @@ type IUserRepository interface {
 	GetUsersByEmailList([]string) ([]models.User, error)
 
 	CreateUsersByEmailList([]string) ([]models.User, error)
+
+	GetUsers(userID uint, query string, limit int) ([]models.User, error)
 }
 
 type userPgRepoImpl struct {
@@ -94,6 +96,16 @@ func (u *userPgRepoImpl) CreateUsersByEmailList(emails []string) ([]models.User,
 	err := u.db.Create(&users).Error
 	if err != nil {
 		return nil, err
+	}
+
+	return users, nil
+}
+
+func (u *userPgRepoImpl) GetUsers(userID uint, query string, limit int) ([]models.User, error) {
+	var users []models.User
+	err := u.db.Where("email LIKE ? OR name LIKE ? AND id <> ?", "%"+query+"%", "%"+query+"%", userID).Order("name ASC").Order("email ASC").Limit(limit).Find(&users).Error
+	if err != nil {
+		return nil, commons.ErrUserNotFound
 	}
 
 	return users, nil
