@@ -35,3 +35,12 @@ func JWTAuth(svc *commons.JwtSvc) func(http.Handler) http.Handler {
 		})
 	}
 }
+
+func GetJWTClaims(ctx context.Context) (*commons.CustomClaims, error) {
+	claims, ok := ctx.Value(commons.ClaimsContext).(*commons.CustomClaims)
+	if !ok {
+		return nil, errors.New("failed to get claims from context")
+	}
+	
+	return claims, nil
+}
