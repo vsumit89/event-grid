@@ -15,7 +15,7 @@ type Event struct {
 	MeetingURL  string    `json:"meeting_url,omitempty"`
 }
 
-type EventAttendees struct {
-	EventID uint
-	UserID  uint
-}
+// type EventAttendees struct {
+// 	EventID uint
+// 	UserID  uint
+// }

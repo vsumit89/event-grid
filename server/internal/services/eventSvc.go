@@ -15,10 +15,11 @@ type EventFilters struct {
 }
 
 type IEventSvc interface {
-	CreateEvent(userID uint, eventDetails *dtos.CreateEvent) (*models.Event, error)
+	CreateEvent(userID uint, eventDetails *dtos.EventDTO) (*models.Event, error)
 	GetEventByID(userID, eventID uint) (*models.Event, error)
 	DeleteEvent(userID, eventID uint) error
 	GetEvents(userID uint, filters EventFilters) ([]models.Event, error)
+	UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error)
 }
 
 type EventSvcOptions struct {
@@ -38,7 +39,7 @@ func NewEventSvc(opts *EventSvcOptions) IEventSvc {
 	}
 }
 
-func (e *eventSvcImpl) CreateEvent(userID uint, eventDetails *dtos.CreateEvent) (*models.Event, error) {
+func (e *eventSvcImpl) CreateEvent(userID uint, eventDetails *dtos.EventDTO) (*models.Event, error) {
 	event := eventDetails.MapToModel(userID)
 
 	currentUser, err := e.UserRepository.GetUserByID(userID)
@@ -102,4 +103,8 @@ func (e *eventSvcImpl) GetEvents(userID uint, filters EventFilters) ([]models.Ev
 		return nil, err
 	}
 	return events, nil
+}
+
+func (e *eventSvcImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error) {
+	return e.EventRepository.UpdateEvent(userID, eventID, eventDetails)
 }

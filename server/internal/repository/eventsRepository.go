@@ -3,8 +3,10 @@ package repository
 import (
 	"errors"
 	"server/internal/commons"
+	"server/internal/handlers/dtos"
 	db "server/internal/infrastructure/database"
 	"server/internal/models"
+	"server/pkg/logger"
 	"time"
 
 	"gorm.io/gorm"
@@ -15,7 +17,7 @@ type IEventsRepository interface {
 	GetEventByID(userID, eventID uint) (*models.Event, error)
 	GetEventByTitle(title string) (*models.Event, error)
 	GetEventsInRange(userID uint, start, end time.Time) ([]models.Event, error)
-	UpdateEvent(id uint, event *models.Event) (*models.Event, error)
+	UpdateEvent(userID, eventID uint, event *dtos.EventDTO) (*models.Event, error)
 	DeleteEvent(userID, eventID uint) error
 }
 
@@ -64,9 +66,78 @@ func (e *eventsPgRepoImpl) GetEventByTitle(title string) (*models.Event, error) 
 	return &event, nil
 }
 
-func (e *eventsPgRepoImpl) UpdateEvent(id uint, event *models.Event) (*models.Event, error) {
-	err := e.db.Model(&models.Event{}).Where("id = ?", id).Updates(event).Error
+func (e *eventsPgRepoImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error) {
+	logger.Info("updating event attendees", "attendees", eventDetails.Attendees, "len", len(eventDetails.Attendees))
+
+	event := &models.Event{
+		Base:        models.Base{ID: eventID},
+		CreatedBy:   userID,
+		Title:       eventDetails.Title,
+		Description: eventDetails.Description,
+		Start:       eventDetails.StartTime,
+		End:         eventDetails.EndTime,
+		MeetingURL:  eventDetails.MeetingURL,
+	}
+
+	var existingAttendees []models.User
+	err := e.db.Model(event).Association("Attendees").Find(&existingAttendees)
 	if err != nil {
+		return nil, err
+	}
+
+	existingAttendeeIDs := make(map[uint]bool)
+	for _, attendee := range existingAttendees {
+		existingAttendeeIDs[attendee.ID] = true
+	}
+
+	for _, email := range eventDetails.Attendees {
+		// Check if the attendee already exists
+		var attendee models.User
+		if err := e.db.Where("email = ?", email).First(&attendee).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				attendee = models.User{Email: email}
+				err = e.db.Create(&attendee).Error
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+		logger.Info("updating event attendee", "attendee", attendee)
+
+		// Add attendee to the event if not already added
+		if _, ok := existingAttendeeIDs[attendee.ID]; !ok {
+			logger.Info("adding event attendee", "attendee", attendee)
+
+			err := e.db.Model(event).Association("Attendees").Append(&attendee)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Remove attendee ID from existing list (for attendees already associated with event)
+		delete(existingAttendeeIDs, attendee.ID)
+	}
+
+	// this will make sure that we are not removing the user who created the event
+	delete(existingAttendeeIDs, userID)
+
+	for attendeeID := range existingAttendeeIDs {
+		var attendee models.User
+		err = e.db.First(&attendee, attendeeID).Error
+		if err != nil {
+			return nil, err
+		}
+
+		err = e.db.Model(event).Association("Attendees").Delete(attendee)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	event.Attendees = nil
+
+	if err := e.db.Save(event).Error; err != nil {
 		return nil, err
 	}
 

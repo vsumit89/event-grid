@@ -15,7 +15,7 @@ func (h *Handler) createEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req dtos.CreateEvent
+	var req dtos.EventDTO
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {

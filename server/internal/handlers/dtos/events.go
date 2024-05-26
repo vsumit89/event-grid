@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type CreateEvent struct {
+type EventDTO struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	StartTime   time.Time `json:"start_time"`
@@ -15,7 +15,7 @@ type CreateEvent struct {
 	MeetingURL  string    `json:"meeting_url"`
 }
 
-func (e *CreateEvent) Validate() error {
+func (e *EventDTO) Validate() error {
 	if e.Title == "" {
 		return errors.New("title cannot be empty")
 	}
@@ -35,7 +35,7 @@ func (e *CreateEvent) Validate() error {
 	return nil
 }
 
-func (e *CreateEvent) MapToModel(userID uint) *models.Event {
+func (e *EventDTO) MapToModel(userID uint) *models.Event {
 	users := make([]models.User, 0)
 
 	return &models.Event{

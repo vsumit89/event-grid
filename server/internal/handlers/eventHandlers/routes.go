@@ -37,5 +37,7 @@ func (h *Handler) GetRoutes() http.Handler {
 
 	eventRouter.Get("/", h.getEvents)
 
+	eventRouter.Put("/{eventID}", h.updateEvent)
+
 	return eventRouter
 }

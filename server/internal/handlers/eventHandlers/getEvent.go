@@ -37,5 +37,9 @@ func (h *Handler) getEvent(w http.ResponseWriter, r *http.Request) {
 	event.Start = event.Start.In(h.timezone)
 	event.End = event.End.In(h.timezone)
 
+	for i := 0; i < len(event.Attendees); i++ {
+		event.Attendees[i].Password = ""
+	}
+
 	utils.SendJSON(w, http.StatusOK, event)
 }

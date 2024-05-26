@@ -60,7 +60,7 @@ func (p *pgDBImpl) Migrate() error {
 	return p.db.AutoMigrate(
 		&models.User{},
 		&models.Event{},
-		&models.EventAttendees{},
+		// &models.EventAttendees{},
 	)
 }
 
