@@ -2,6 +2,7 @@ package dtos
 
 import (
 	"errors"
+	"server/internal/models"
 	"time"
 )
 
@@ -32,4 +33,18 @@ func (e *CreateEvent) Validate() error {
 	}
 
 	return nil
+}
+
+func (e *CreateEvent) MapToModel(userID uint) *models.Event {
+	users := make([]models.User, 0)
+
+	return &models.Event{
+		Title:       e.Title,
+		Description: e.Description,
+		Start:       e.StartTime,
+		End:         e.EndTime,
+		Attendees:   users,
+		MeetingURL:  e.MeetingURL,
+		CreatedBy:   userID,
+	}
 }

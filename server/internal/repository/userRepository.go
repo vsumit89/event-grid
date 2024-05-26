@@ -17,6 +17,10 @@ type IUserRepository interface {
 	GetUserByID(id uint) (*models.User, error)
 	GetUserByEmail(email string) (*models.User, error)
 	UpdateUser(id uint, user *models.User) (*models.User, error)
+
+	GetUsersByEmailList([]string) ([]models.User, error)
+
+	CreateUsersByEmailList([]string) ([]models.User, error)
 }
 
 type userPgRepoImpl struct {
@@ -68,4 +72,29 @@ func (u *userPgRepoImpl) UpdateUser(id uint, user *models.User) (*models.User, e
 	}
 
 	return user, nil
+}
+
+func (u *userPgRepoImpl) GetUsersByEmailList(emails []string) ([]models.User, error) {
+	var users []models.User
+	err := u.db.Where("email IN ?", emails).Find(&users).Error
+	if err != nil {
+		return nil, commons.ErrUserNotFound
+	}
+
+	return users, nil
+}
+
+func (u *userPgRepoImpl) CreateUsersByEmailList(emails []string) ([]models.User, error) {
+	users := make([]models.User, 0)
+
+	for _, email := range emails {
+		users = append(users, models.User{Email: email})
+	}
+
+	err := u.db.Create(&users).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
