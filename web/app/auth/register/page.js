@@ -140,7 +140,6 @@ export default function RegistrationPage() {
     const handleSubmit = async () => {
         const isValid = validateForm()
 
-        console.log(isValid)
         if (!isValid) {
             return
         }

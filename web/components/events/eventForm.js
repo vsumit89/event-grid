@@ -195,8 +195,6 @@ export function EventForm({
 
     const [searchTerm, setSearchTerm] = useState('')
 
-    console.log(userOptions)
-
     return (
         <div
             className={`bg-modal-background p-4 w-2/5 rounded-md text-white flex flex-col gap-2 overflow-y-scroll`}
