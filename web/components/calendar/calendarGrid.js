@@ -2,12 +2,22 @@ import {
     minuteDiffBetweenTime,
     getDateList,
     splitMeetings,
+    daysBetweenDates,
 } from '@/commons/dateTime'
 import { dayNames } from '@/constants/date'
 import { DayTile } from './dayTile'
+import { useEffect, useState } from 'react'
 
-export function CalendarGrid({ startDate, endDate, toggleForm }) {
-    const dateList = getDateList(startDate, endDate)
+export function CalendarGrid({ 
+        startDate,
+        endDate, 
+        toggleForm,
+        timeFormat,
+        openDate,
+    }) {
+    const [dateList, setDateList] = useState([])
+
+    const [totalDays, setTotalDays] = useState(0)
 
     const today = new Date()
 
@@ -37,6 +47,11 @@ export function CalendarGrid({ startDate, endDate, toggleForm }) {
         },
     ]
 
+    useEffect(() => {
+        setDateList(getDateList(startDate, endDate))
+        setTotalDays(daysBetweenDates(startDate, endDate))
+    }, [startDate, endDate])
+
     const daysWithMeetings = splitMeetings(meetings)
 
     return (
@@ -45,15 +60,15 @@ export function CalendarGrid({ startDate, endDate, toggleForm }) {
                 {[...Array(24)].map((_, hour) => (
                     <div
                         key={hour}
-                        className="h-20 flex text-white text-xs relative"
+                        className="h-20 flex text-white text-xs relative mr-2"
                     >
                         <span className="relative top-[-8px]">
-                            {hour}:{'00'}
+                            {timeFormat === 12 ? `${hour % 12 || 12}` : hour }:{'00'} {timeFormat === 12 && (hour < 12 ? 'AM' : 'PM')}
                         </span>
                     </div>
                 ))}
             </div>
-            <div className="grid grid-cols-7 flex-1 gap-y-0">
+            <div className={`grid grid-cols-${totalDays + 1} flex-1 gap-y-0`}>
                 {dateList.map((date) => {
                     let top = 20 * 4 * 3
 
@@ -103,8 +118,14 @@ export function CalendarGrid({ startDate, endDate, toggleForm }) {
                                         )
                                     }
                                 )}
-                            <div className="h-16 flex items-center justify-center cursor-pointer text-white text-xs">
-                                {dayNames[date.getDay()]} {date.getDate()}
+                            <div 
+                                className="h-16 flex flex-col items-center justify-center cursor-pointer text-white opacity-70 hover:opacity-100"
+                                onClick={() => {
+                                    openDate(date)
+                                }}
+                            >
+                                <span className='text-[10px]'>{dayNames[date.getDay()]} </span>
+                                <span className='text-xl'> {date.getDate()}</span>
                             </div>
                             {[...Array(24)].map((_, hour) => (
                                 <div

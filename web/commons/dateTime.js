@@ -1,3 +1,5 @@
+import { shortMonthNames } from '@/constants/date'
+
 export function areSameDate(firstDate, secondDate) {
     // Extract year, month, and day from the first date
     let firstYear = firstDate.getFullYear()
@@ -112,4 +114,41 @@ export function minuteDiffBetweenTime(startTimestamp, endTimestamp) {
     const timeDifferenceMinutes = timeDifference / (1000 * 60)
 
     return timeDifferenceMinutes
+}
+
+// daysBetweenDates calculates the number of days between two dates
+export function daysBetweenDates(startDate, endDate) {
+    const diffTime = Math.abs(endDate - startDate)
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+}
+
+export function formatDateRange(dateRange) {
+    const initialDate = dateRange.initialDate
+    const finalDate = dateRange.finalDate
+
+    let formattedRange = ''
+
+    // Start date
+    if (initialDate.getDate() !== finalDate.getDate()) {
+        formattedRange += initialDate.getDate() + ' '
+    }
+
+    if (initialDate.getMonth() !== finalDate.getMonth()) {
+        formattedRange += shortMonthNames[initialDate.getMonth()] + ' '
+    }
+
+    if (initialDate.getFullYear() !== finalDate.getFullYear()) {
+        formattedRange += `${initialDate.getFullYear()}, `
+    }
+
+    // Separator
+    if (initialDate.getDate() !== finalDate.getDate()) {
+        formattedRange += '- '
+    }
+
+    // End date
+    formattedRange += `${finalDate.getDate()} ${shortMonthNames[finalDate.getMonth()]} ${finalDate.getFullYear()}`
+
+    return formattedRange
 }
