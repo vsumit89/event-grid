@@ -136,6 +136,7 @@ func (e *eventsPgRepoImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.
 	}
 
 	event.Attendees = nil
+	event.CreatedAt = time.Now()
 
 	if err := e.db.Save(event).Error; err != nil {
 		return nil, err
