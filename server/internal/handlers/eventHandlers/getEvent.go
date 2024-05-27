@@ -20,7 +20,7 @@ func (h *Handler) getEvent(w http.ResponseWriter, r *http.Request) {
 
 	eventID, err := strconv.Atoi(chi.URLParam(r, "eventID"))
 	if err != nil {
-		utils.SendError(w, http.StatusBadRequest, err)
+		utils.SendError(w, http.StatusBadRequest, commons.ErrInvalidEventID)
 		return
 	}
 
@@ -33,9 +33,6 @@ func (h *Handler) getEvent(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	// event.Start = event.Start.In(h.timezone)
-	// event.End = event.End.In(h.timezone)
 
 	for i := 0; i < len(event.Attendees); i++ {
 		event.Attendees[i].Password = ""
