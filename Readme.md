@@ -17,4 +17,4 @@ A calendar application built in React and Go which helps in event management
 
 
 ## Backend Architecture 
-[https://github.com/vsumit89/event-grid/tree/main/server](Link)
+[Link](https://github.com/vsumit89/event-grid/tree/main/server)
