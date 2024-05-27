@@ -5,6 +5,7 @@ type Config struct {
 	DB     *DBConfig    `yaml:"db"`
 	JWT    *JWTConfig   `yaml:"jwt"`
 	Queue  *QueueConfig `yaml:"queue"`
+	Email  *EmailConfig `yaml:"email"`
 }
 
 type ServerConfig struct {
@@ -32,4 +33,9 @@ type QueueConfig struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
 	Port     string `yaml:"port"`
+}
+
+type EmailConfig struct {
+	Domain string `yaml:"domain"`
+	APIKey string `yaml:"apikey"`
 }

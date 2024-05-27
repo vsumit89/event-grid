@@ -1,12 +1,15 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"server/internal/commons"
 	"server/internal/handlers/dtos"
 	"server/internal/infrastructure/mq"
 	"server/internal/models"
 	"server/internal/repository"
+	"server/internal/workers"
+	"server/pkg/logger"
 	"time"
 )
 
@@ -32,12 +35,14 @@ type EventSvcOptions struct {
 type eventSvcImpl struct {
 	EventRepository repository.IEventsRepository
 	UserRepository  repository.IUserRepository
+	MQ              mq.IMessageQueue
 }
 
 func NewEventSvc(opts *EventSvcOptions) IEventSvc {
 	return &eventSvcImpl{
 		EventRepository: opts.EventRepository,
 		UserRepository:  opts.UserRepository,
+		MQ:              opts.MQ,
 	}
 }
 
@@ -97,6 +102,29 @@ func (e *eventSvcImpl) CreateEvent(userID uint, eventDetails *dtos.EventDTO) (*m
 		return nil, err
 	}
 
+	unixTimestamp := event.Start.Add(-10 * time.Minute).Unix()
+
+	ch, err := e.MQ.DeclareQueue(commons.QueueName)
+	if err != nil {
+		logger.Warn("error while declaring queue", "error", err.Error())
+	}
+
+	eventTobePublished := workers.NotificationEvent{
+		EventID:       event.ID,
+		UnixTimestamp: unixTimestamp,
+		Kind:          "scheduler",
+		CreatedBy:     userID,
+	}
+
+	jsonData, err := json.Marshal(eventTobePublished)
+	if err != nil {
+		logger.Warn("error while marshalling event", "error", err.Error())
+	}
+	err = e.MQ.PublishWithExchange(ch, jsonData, commons.ExchangeName)
+	if err != nil {
+		logger.Warn("error while publishing event", "error", err.Error())
+	}
+
 	return event, nil
 }
 
@@ -117,5 +145,33 @@ func (e *eventSvcImpl) GetEvents(userID uint, filters EventFilters) ([]models.Ev
 }
 
 func (e *eventSvcImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error) {
-	return e.EventRepository.UpdateEvent(userID, eventID, eventDetails)
+	updatedEvent, err := e.EventRepository.UpdateEvent(userID, eventID, eventDetails)
+	if err != nil {
+		return nil, err
+	}
+
+	unixTimestamp := updatedEvent.Start.Add(-10 * time.Minute).Unix()
+
+	ch, err := e.MQ.DeclareQueue(commons.QueueName)
+	if err != nil {
+		logger.Warn("error while declaring queue", "error", err.Error())
+	}
+
+	eventTobePublished := workers.NotificationEvent{
+		EventID:       updatedEvent.ID,
+		UnixTimestamp: unixTimestamp,
+		Kind:          "update",
+		CreatedBy:     userID,
+	}
+
+	jsonData, err := json.Marshal(eventTobePublished)
+	if err != nil {
+		logger.Warn("error while marshalling event", "error", err.Error())
+	}
+	err = e.MQ.PublishWithExchange(ch, jsonData, commons.ExchangeName)
+	if err != nil {
+		logger.Warn("error while publishing event", "error", err.Error())
+	}
+
+	return updatedEvent, nil
 }

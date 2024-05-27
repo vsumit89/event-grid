@@ -20,3 +20,8 @@ jwt:
   secret: "secret"
   ttl: 1
   unit: days # days, hours, minutes
+
+
+email:
+  domain: "some-domain-name"
+  apikey: "some-api-key"

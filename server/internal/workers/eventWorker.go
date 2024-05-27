@@ -43,6 +43,9 @@ func (h *MinHeapEvent) Remove(eventID uint) {
 		// Event not found
 		return
 	}
+
+	logger.Info("event removed", "event_id", eventID, "found", idx)
+
 	heap.Remove(h, idx)
 }
 
@@ -167,6 +170,12 @@ func (d *EventDispatcher) AddEvent(event *NotificationEvent) {
 	worker.AddEvent(*event)
 
 	logger.Info("event added", "event", event)
+}
+
+func (d *EventDispatcher) RemoveEvent(eventID uint) {
+	for _, worker := range d.workers {
+		worker.minHeap.Remove(eventID)
+	}
 }
 
 func (d *EventDispatcher) Stop() {

@@ -149,16 +149,17 @@ func main() {
 		return
 	}
 
-	ch, err := mqClient.DeclareQueueWithExchange(commons.ExchangeName, commons.QueueName)
+	ch, err := mqClient.DeclareQueueWithExchange(commons.EmailExchange, commons.EmailQueue)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return
 	}
 
 	request := map[string]interface{}{
-		"timestamp": time.Now().Add(10 * time.Second).Unix(),
-		"event_id":  37,
-		"kind":      "scheduler",
+		"timestamp":  time.Now().Add(10 * time.Second).Unix(),
+		"event_id":   46,
+		"created_by": 29,
+		"kind":       "email",
 	}
 
 	// request2 := map[string]interface{}{

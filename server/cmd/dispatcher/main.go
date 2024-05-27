@@ -3,6 +3,10 @@ package main
 import (
 	"container/heap"
 	"fmt"
+	"log"
+	"server/internal/config"
+	"server/internal/infrastructure/email"
+	"server/pkg/logger"
 	"sync"
 	"time"
 )
@@ -149,29 +153,18 @@ func (d *Dispatcher) Stop() {
 }
 
 func main() {
-	numWorkers := 4 // Number of workers
+	logger.InitLogger()
 
-	ticker := time.NewTicker(time.Second)
-
-	go func() {
-		count := 0
-		for {
-			<-ticker.C
-			count = count + 1
-			fmt.Println("this is count", count)
-			// worker.AddTime(time.Now().Unix())
-		}
-	}()
-
-	dispatcher := NewDispatcher(numWorkers)
-
-	dispatcher.Start()
-
-	// Example usage
-	for i := 0; i < 100; i++ {
-		dispatcher.AddTime(time.Now().Add(time.Duration(5) * time.Second).Unix())
+	emailCfg := config.EmailConfig{
+		Domain: "sandbox8599fe97a8984435a25e6659460031ed.mailgun.org",
+		APIKey: "a016f4dbddd4368726eca1dfcc4a45ec-0996409b-d81c4108",
 	}
 
-	time.Sleep(1 * time.Minute)
-	dispatcher.Stop()
+	emailSvc := email.NewEmailSvc(&emailCfg)
+
+	err := emailSvc.SendEmail("vsumit030201@gmail.com", "Test", "Test", "randomsumit7@gmail.com")
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }

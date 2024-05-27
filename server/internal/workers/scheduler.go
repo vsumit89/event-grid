@@ -12,6 +12,7 @@ type NotificationEvent struct {
 	UnixTimestamp int64  `json:"timestamp"`
 	EventID       uint   `json:"event_id"`
 	Kind          string `json:"kind"`
+	CreatedBy     uint   `json:"created_by"`
 }
 
 type NotificationScheduler struct {
@@ -35,12 +36,13 @@ func (n *NotificationScheduler) HandleMessage(message interface{}) {
 		return
 	}
 
-	if event.Kind != "scheduler" {
-		rabbitMqMsg.Ack(false)
-		return
-	}
-
 	logger.Info("event read successfully", "event", event)
+
+	if event.Kind == "update" {
+		logger.Info("calling remove event", "event", event.EventID)
+
+		n.Dispatcher.RemoveEvent(event.EventID)
+	}
 
 	n.Dispatcher.AddEvent(&event)
 

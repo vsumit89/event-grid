@@ -7,6 +7,7 @@ import (
 	"server/internal/commons"
 	"server/internal/config"
 	db "server/internal/infrastructure/database"
+	"server/internal/infrastructure/email"
 	"server/internal/infrastructure/mq"
 	"server/internal/repository"
 	"server/internal/workers"
@@ -66,7 +67,11 @@ func main() {
 
 	eventRepo := repository.NewEventsRepository(dbClient)
 
-	emailWorker := workers.NewEmailWorker(eventRepo)
+	userRepo := repository.NewUserRepository(dbClient)
+
+	emailSvc := email.NewEmailSvc(cfg.Email)
+
+	emailWorker := workers.NewEmailWorker(eventRepo, userRepo, emailSvc)
 
 	go func() {
 		mqClient.Consume(ch, commons.EmailQueue, emailWorker)
