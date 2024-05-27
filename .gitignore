@@ -2,3 +2,6 @@ volumes
 
 coverage.html
 coverage.out
+
+main 
+worker

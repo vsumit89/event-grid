@@ -182,7 +182,6 @@ func (e *eventsPgRepoImpl) GetEventsInRange(userID uint, start, end time.Time) (
 		return nil, result.Error
 	}
 
-	fmt.Println("number of rows affected", result.RowsAffected)
 	return events, nil
 }
 

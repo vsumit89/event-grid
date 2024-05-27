@@ -19,6 +19,51 @@ services:
     networks:
       - eventgrid
 
+  eventgrid-api:
+    build:
+      context: ./server
+      dockerfile: ./docker/Dockerfile.dev
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./server:/app
+    networks:
+      - eventgrid
+
+
+  notification-worker:
+    build:
+      context: ./server
+      dockerfile: ./docker/Dockerfile.worker
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./server:/app
+    networks:
+      - eventgrid
+
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmquser
+      - RABBITMQ_DEFAULT_PASS=rabbitmqpassword
+    volumes:
+      - ./volumes/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 15s
+      retries: 5
+    networks:
+      - eventgrid
+
 
 networks:
   eventgrid:
