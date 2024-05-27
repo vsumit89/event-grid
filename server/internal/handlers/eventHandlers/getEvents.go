@@ -39,8 +39,8 @@ func (h *Handler) getEvents(w http.ResponseWriter, r *http.Request) {
 			utils.SendError(w, http.StatusBadRequest, err)
 			return
 		}
+
 		// adding 24 hours to the end time
-		// because end in sql is exclusive
 		endTime = endTime.Add(24 * time.Hour)
 	}
 

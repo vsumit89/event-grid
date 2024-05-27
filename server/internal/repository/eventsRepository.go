@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"server/internal/commons"
 	"server/internal/handlers/dtos"
 	db "server/internal/infrastructure/database"
@@ -162,10 +163,14 @@ func (e *eventsPgRepoImpl) GetEventsByUserID(userID uint) ([]models.Event, error
 func (e *eventsPgRepoImpl) GetEventsInRange(userID uint, start, end time.Time) ([]models.Event, error) {
 	var events []models.Event
 
-	err := e.db.Model(&models.Event{}).Where("start BETWEEN ? AND ? AND ? IN (SELECT user_id FROM event_attendees WHERE event_attendees.event_id = events.id)", start, end, userID).Find(&events).Error
-	if err != nil {
-		return nil, err
+	startTime := start.Format("2006-01-02 15:04:05") + "+05:30"
+	endTime := end.Format("2006-01-02 15:04:05") + "+05:30"
+
+	result := e.db.Model(&models.Event{}).Where("start >= ? AND start <= ? AND ? IN (SELECT user_id FROM event_attendees WHERE event_attendees.event_id = events.id)", startTime, endTime, userID).Find(&events)
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
+	fmt.Println("number of rows affected", result.RowsAffected)
 	return events, nil
 }

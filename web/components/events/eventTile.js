@@ -70,6 +70,7 @@ export function EventDetailTile({ event, onClose, userId, onDelete, onEdit }) {
                     <PencilSimple
                         size={20}
                         cursor={'pointer'}
+                        className="hover:text-primary-text"
                         onClick={() => onEdit(event?.id)}
                     />
                     <div>
@@ -79,6 +80,7 @@ export function EventDetailTile({ event, onClose, userId, onDelete, onEdit }) {
                             <Trash
                                 size={20}
                                 cursor={'pointer'}
+                                className="hover:text-error-text"
                                 onClick={() => onDelete(event?.id)}
                             />
                         )}
@@ -86,7 +88,7 @@ export function EventDetailTile({ event, onClose, userId, onDelete, onEdit }) {
                 </div>
                 {event?.meeting_url && (
                     <a
-                        className="text-sm bg-white text-black px-4 py-1 rounded-md w-fit opacity-70 hover:opacity-100"
+                        className="text-sm bg-white text-black px-4 py-1 rounded-md w-fit"
                         href={event?.meeting_url}
                         target="_blank"
                         rel="noreferrer"

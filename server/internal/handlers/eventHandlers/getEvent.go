@@ -34,8 +34,8 @@ func (h *Handler) getEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	event.Start = event.Start.In(h.timezone)
-	event.End = event.End.In(h.timezone)
+	// event.Start = event.Start.In(h.timezone)
+	// event.End = event.End.In(h.timezone)
 
 	for i := 0; i < len(event.Attendees); i++ {
 		event.Attendees[i].Password = ""
