@@ -149,7 +149,7 @@ func main() {
 		return
 	}
 
-	ch, err := mqClient.DeclareQueue(commons.EmailQueue)
+	ch, err := mqClient.DeclareQueueWithExchange(commons.ExchangeName, commons.QueueName)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return

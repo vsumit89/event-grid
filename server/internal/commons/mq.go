@@ -5,5 +5,6 @@ const (
 
 	QueueName = "notification_queue"
 
-	EmailQueue = "email_queue"
+	EmailQueue    = "email_queue"
+	EmailExchange = "email_exchange"
 )

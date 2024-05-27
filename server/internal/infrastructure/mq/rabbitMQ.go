@@ -14,7 +14,6 @@ import (
 
 type rabbitMQClient struct {
 	client *amqp091.Connection
-	queue  amqp091.Queue
 	cfg    *config.QueueConfig
 }
 
@@ -70,7 +69,7 @@ func (r *rabbitMQClient) DeclareQueue(queueName string) (*amqp091.Channel, error
 		return nil, err
 	}
 
-	r.queue, err = ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		queueName, // name
 		false,     // durable
 		false,     // delete when unused
@@ -118,7 +117,7 @@ func (r *rabbitMQClient) DeclareQueueWithExchange(exchangeName, queueName string
 		return nil, err
 	}
 
-	r.queue, err = ch.QueueDeclare(
+	_, err = ch.QueueDeclare(
 		queueName, // name
 		false,     // durable
 		false,     // delete when unused
@@ -168,15 +167,38 @@ func (r *rabbitMQClient) Publish(ch *amqp091.Channel, body []byte) error {
 	return nil
 }
 
+func (r *rabbitMQClient) PublishWithExchange(ch *amqp091.Channel, body []byte, exchangeName string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := ch.PublishWithContext(
+		ctx,
+		exchangeName,
+		"notification",
+		false, // mandatory
+		false, // immediate
+		amqp091.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		},
+	)
+	if err != nil {
+		logger.Info("Error publishing message", "error", err)
+		return err
+	}
+
+	return nil
+}
+
 func (r *rabbitMQClient) Consume(ch *amqp091.Channel, queueName string, handler IMessageHandler) {
 	logger.Info("consumer started")
 
-	logger.Info("binding queue", "queue", r.queue.Name)
+	logger.Info("binding queue", "queue", queueName)
 
 	msgs, err := ch.Consume(
 		queueName, // queue
 		"",        // consumer
-		true,      // auto-ack
+		false,     // auto-ack
 		false,     // exclusive
 		false,     // no-local
 		false,     // no-wait

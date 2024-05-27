@@ -52,13 +52,13 @@ func main() {
 		return
 	}
 
-	ch, err := mqClient.DeclareQueue(commons.QueueName)
+	ch, err := mqClient.DeclareQueueWithExchange(commons.ExchangeName, commons.QueueName)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return
 	}
 
-	emailCh, err := mqClient.DeclareQueue(commons.EmailQueue)
+	emailCh, err := mqClient.DeclareQueueWithExchange(commons.EmailExchange, commons.EmailQueue)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return
@@ -76,7 +76,8 @@ func main() {
 				return
 			}
 
-			err = mqClient.Publish(emailCh, jsonBody)
+			logger.Info("publishing event to the email queue", "body", string(jsonBody))
+			err = mqClient.PublishWithExchange(emailCh, jsonBody, commons.EmailExchange)
 			if err != nil {
 				logger.Error("error while dispatching event", "error", err.Error())
 				return
