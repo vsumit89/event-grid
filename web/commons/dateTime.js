@@ -294,3 +294,11 @@ export const getDateForUpdateInput = (timestamp) => {
 
     return formattedDate
 }
+
+export function wasBeforeNow(date) {
+    const dateObj = new Date(date)
+
+    const now = new Date()
+
+    return dateObj < now
+}

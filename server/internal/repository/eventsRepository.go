@@ -20,6 +20,8 @@ type IEventsRepository interface {
 	GetEventsInRange(userID uint, start, end time.Time) ([]models.Event, error)
 	UpdateEvent(userID, eventID uint, event *dtos.EventDTO) (*models.Event, error)
 	DeleteEvent(userID, eventID uint) error
+
+	IsUserAvailableForEvent(userID uint, start, end time.Time) (bool, error)
 }
 
 type eventsPgRepoImpl struct {
@@ -70,7 +72,16 @@ func (e *eventsPgRepoImpl) GetEventByTitle(title string) (*models.Event, error) 
 func (e *eventsPgRepoImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error) {
 	logger.Info("updating event attendees", "attendees", eventDetails.Attendees, "len", len(eventDetails.Attendees))
 
-	event := &models.Event{
+	event, err := e.GetEventByID(userID, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	if time.Now().After(event.Start) {
+		return nil, fmt.Errorf("user can't update an event that has already started")
+	}
+
+	event = &models.Event{
 		Base:        models.Base{ID: eventID},
 		CreatedBy:   userID,
 		Title:       eventDetails.Title,
@@ -81,7 +92,7 @@ func (e *eventsPgRepoImpl) UpdateEvent(userID, eventID uint, eventDetails *dtos.
 	}
 
 	var existingAttendees []models.User
-	err := e.db.Model(event).Association("Attendees").Find(&existingAttendees)
+	err = e.db.Model(event).Association("Attendees").Find(&existingAttendees)
 	if err != nil {
 		return nil, err
 	}
@@ -173,4 +184,17 @@ func (e *eventsPgRepoImpl) GetEventsInRange(userID uint, start, end time.Time) (
 
 	fmt.Println("number of rows affected", result.RowsAffected)
 	return events, nil
+}
+
+func (e *eventsPgRepoImpl) IsUserAvailableForEvent(userID uint, start, end time.Time) (bool, error) {
+	events, err := e.GetEventsInRange(userID, start, end)
+	if err != nil {
+		return false, err
+	}
+
+	if len(events) > 0 {
+		return false, nil
+	}
+
+	return true, nil
 }

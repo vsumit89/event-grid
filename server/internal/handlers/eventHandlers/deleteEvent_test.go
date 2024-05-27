@@ -107,4 +107,64 @@ func TestDeleteEvent(t *testing.T) {
 		}
 	})
 
+	t.Run("TestDeleteEvent_JWTClaimsFailed", func(t *testing.T) {
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("eventID", fmt.Sprintf("%d", successEvent.ID))
+
+		req, err := http.NewRequest(http.MethodDelete, "/api/v1/events/{eventID}", nil)
+		if err != nil {
+			t.Error(err)
+		}
+
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		rr := httptest.NewRecorder()
+
+		eventHandler.deleteEvent(rr, req)
+
+		if status := rr.Code; status != http.StatusUnauthorized {
+			data := rr.Body.String()
+
+			logger.Info("response", "data", data)
+
+			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusUnauthorized)
+		}
+
+		t.Run("TestDeleteEvent_WithInvalidEventID", func(t *testing.T) {
+			parentCtx := context.Background()
+
+			rctx := chi.NewRouteContext()
+			rctx.URLParams.Add("eventID", "s")
+
+			ctx := context.WithValue(parentCtx, commons.ClaimsContext, &commons.CustomClaims{
+				UserID: successEvent.CreatedBy,
+				Email:  userEmail,
+				StandardClaims: jwt.StandardClaims{
+					ExpiresAt: time.Now().Add(time.Minute * 5).Unix(),
+				},
+			})
+
+			req, err := http.NewRequestWithContext(ctx, http.MethodDelete, "/api/v1/events/{eventID}", nil)
+			if err != nil {
+				t.Error(err)
+			}
+
+			req = req.WithContext(ctx)
+
+			req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+			rr := httptest.NewRecorder()
+
+			eventHandler.deleteEvent(rr, req)
+
+			if status := rr.Code; status != http.StatusBadRequest {
+				data := rr.Body.String()
+
+				logger.Info("response", "data", data)
+
+				t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusBadRequest)
+			}
+		})
+	})
+
 }

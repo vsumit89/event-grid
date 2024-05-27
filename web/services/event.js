@@ -66,44 +66,56 @@ export const deleteEvent = async (id) => {
 }
 
 export const createEvent = async (data) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/events`,
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            credentials: 'include',
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/events`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                credentials: 'include',
+            }
+        )
+
+        const responseData = await response.json()
+
+        if (!response.ok) {
+            throw new Error(
+                responseData.error.message || 'Something went wrong'
+            )
         }
-    )
-
-    const responseData = await response.json()
-
-    if (!response.ok) {
-        throw new Error(responseData.error.message || 'Something went wrong')
+    } catch (error) {
+        throw new Error(error)
     }
 
     return responseData
 }
 
 export const updateEvent = async (id, data) => {
-    const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/events/${id}`,
-        {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-            credentials: 'include',
+    try {
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/events/${id}`,
+            {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                credentials: 'include',
+            }
+        )
+
+        const responseData = await response.json()
+
+        if (!response.ok) {
+            throw new Error(
+                responseData.error.message || 'Something went wrong'
+            )
         }
-    )
-
-    const responseData = await response.json()
-
-    if (!response.ok) {
-        throw new Error(responseData.error.message || 'Something went wrong')
+    } catch (error) {
+        throw new Error(error)
     }
 
     return responseData

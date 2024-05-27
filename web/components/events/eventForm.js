@@ -17,6 +17,7 @@ export function EventForm({
     onClose,
     updateEvent,
     ownerID,
+    formError,
 }) {
     const [eventDetails, setEventDetails] = useState({
         title: {
@@ -211,6 +212,7 @@ export function EventForm({
                 </span>
             </div>
             <hr className="opacity-30 mb-2" />
+            {<span className="text-xs text-error-text">{formError}</span>}
             <Input
                 label="Title"
                 placeholder="Title"
@@ -399,14 +401,18 @@ export function EventForm({
 
                     setLoading(true)
 
-                    handleSubmit({
-                        title: eventDetails.title.value,
-                        description: eventDetails.description.value,
-                        meeting_url: eventDetails.meetingUrl.value,
-                        attendees: eventDetails.attendees.value,
-                        start_time: `${eventDetails.start.value}:00+05:30`,
-                        end_time: `${eventDetails.end.value}:00+05:30`,
-                    })
+                    try {
+                        handleSubmit({
+                            title: eventDetails.title.value,
+                            description: eventDetails.description.value,
+                            meeting_url: eventDetails.meetingUrl.value,
+                            attendees: eventDetails.attendees.value,
+                            start_time: `${eventDetails.start.value}:00+05:30`,
+                            end_time: `${eventDetails.end.value}:00+05:30`,
+                        })
+                    } catch (error) {
+                        setFormError(error.message)
+                    }
 
                     setLoading(false)
                 }}

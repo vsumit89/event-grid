@@ -1,6 +1,10 @@
 'use client'
 
-import { formatTimeForDetails, getFromToTime } from '@/commons/dateTime'
+import {
+    formatTimeForDetails,
+    getFromToTime,
+    wasBeforeNow,
+} from '@/commons/dateTime'
 import { CircleNotch, PencilSimple, Trash, X } from '@phosphor-icons/react'
 import { useState } from 'react'
 
@@ -67,12 +71,14 @@ export function EventDetailTile({ event, onClose, userId, onDelete, onEdit }) {
             </div>
             <div className="flex flex-row-reverse justify-between items-center opacity-70">
                 <div className="flex gap-4 items-center">
-                    <PencilSimple
-                        size={20}
-                        cursor={'pointer'}
-                        className="hover:text-primary-text"
-                        onClick={() => onEdit(event?.id)}
-                    />
+                    {!wasBeforeNow(event?.start) && (
+                        <PencilSimple
+                            size={20}
+                            cursor={'pointer'}
+                            className="hover:text-primary-text"
+                            onClick={() => onEdit(event?.id)}
+                        />
+                    )}
                     <div>
                         {loading ? (
                             <CircleNotch size={20} className="animate-spin" />

@@ -46,6 +46,8 @@ export default function Home() {
     })
 
     const handleCreateFormVisibility = (date, start, end) => {
+        setFormError('')
+
         setCreateFormOptions({ date, start, end })
 
         setShowCreateForm(!showCreateForm)
@@ -67,6 +69,8 @@ export default function Home() {
     } = useEvents(dateRange.initialDate, dateRange.finalDate)
 
     const [eventInFocus, setEventInFocus] = useState(null)
+
+    const [formError, setFormError] = useState('')
 
     return (
         <main className="flex w-screen h-screen bg-primary-background relative">
@@ -138,11 +142,16 @@ export default function Home() {
                         options={createFormOptions}
                         onClose={() => setShowCreateForm(false)}
                         handleSubmit={async (data) => {
-                            await createEvent(data)
-                            refreshEvents()
-                            setShowCreateForm(false)
+                            try {
+                                await createEvent(data)
+                                refreshEvents()
+                                setShowCreateForm(false)
+                            } catch (error) {
+                                setFormError(error.message)
+                            }
                         }}
                         ownerID={profile?.id}
+                        formError={formError}
                     />
                 </Backdrop>
             ) : null}
@@ -163,6 +172,7 @@ export default function Home() {
                             }
                         }}
                         onEdit={() => {
+                            setFormError('')
                             setShowUpdateForm(true)
                         }}
                     />
@@ -173,13 +183,18 @@ export default function Home() {
                     <EventForm
                         onClose={() => setShowUpdateForm(false)}
                         handleSubmit={async (data) => {
-                            await updateEvent(eventInFocus.id, data)
-                            refreshEvents()
-                            setShowUpdateForm(false)
-                            setEventInFocus(null)
+                            try {
+                                await updateEvent(eventInFocus.id, data)
+                                refreshEvents()
+                                setShowUpdateForm(false)
+                                setEventInFocus(null)
+                            } catch (error) {
+                                setFormError(error.message)
+                            }
                         }}
                         updateEvent={eventInFocus}
                         ownerID={profile?.id}
+                        formError={formError}
                     />
                 </Backdrop>
             )}

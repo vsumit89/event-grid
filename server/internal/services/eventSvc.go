@@ -47,6 +47,15 @@ func (e *eventSvcImpl) CreateEvent(userID uint, eventDetails *dtos.EventDTO) (*m
 		return nil, err
 	}
 
+	isAvailable, err := e.EventRepository.IsUserAvailableForEvent(userID, event.Start, event.End)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isAvailable {
+		return nil, commons.ErrInvalidEventTime
+	}
+
 	// gets all the users who already exists based on their emails
 	users, err := e.UserRepository.GetUsersByEmailList(eventDetails.Attendees)
 	if err != nil {
