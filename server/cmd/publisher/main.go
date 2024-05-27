@@ -149,46 +149,35 @@ func main() {
 		return
 	}
 
-	ch, err := mqClient.DeclareQueue(commons.QueueName)
+	ch, err := mqClient.DeclareQueue(commons.EmailQueue)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return
 	}
 
 	request := map[string]interface{}{
-		"timestamp": time.Now().Add(30 * time.Second).Unix(),
-		"event_id":  1,
-	}
-
-	request2 := map[string]interface{}{
 		"timestamp": time.Now().Add(10 * time.Second).Unix(),
-		"event_id":  2,
+		"event_id":  37,
+		"kind":      "scheduler",
 	}
 
-	request3 := map[string]interface{}{
-		"timestamp": time.Now().Add(15 * time.Second).Unix(),
-		"event_id":  3,
-	}
+	// request2 := map[string]interface{}{
+	// 	"timestamp": time.Now().Add(10 * time.Second).Unix(),
+	// 	"event_id":  2,
+	// }
+
+	// request3 := map[string]interface{}{
+	// 	"timestamp": time.Now().Add(15 * time.Second).Unix(),
+	// 	"event_id":  3,
+	// }
 
 	data, _ := json.Marshal(request)
 
-	data2, _ := json.Marshal(request2)
+	// data2, _ := json.Marshal(request2)
 
-	data3, _ := json.Marshal(request3)
+	// data3, _ := json.Marshal(request3)
 
 	err = mqClient.Publish(ch, data)
-	if err != nil {
-		logger.Error("error while starting application", "error", err.Error())
-		return
-	}
-
-	err = mqClient.Publish(ch, data2)
-	if err != nil {
-		logger.Error("error while starting application", "error", err.Error())
-		return
-	}
-
-	err = mqClient.Publish(ch, data3)
 	if err != nil {
 		logger.Error("error while starting application", "error", err.Error())
 		return

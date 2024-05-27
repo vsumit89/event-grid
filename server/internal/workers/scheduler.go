@@ -9,8 +9,9 @@ import (
 )
 
 type NotificationEvent struct {
-	UnixTimestamp int64 `json:"timestamp"`
-	EventID       uint  `json:"event_id"`
+	UnixTimestamp int64  `json:"timestamp"`
+	EventID       uint   `json:"event_id"`
+	Kind          string `json:"kind"`
 }
 
 type NotificationScheduler struct {
@@ -34,8 +35,14 @@ func (n *NotificationScheduler) HandleMessage(message interface{}) {
 		return
 	}
 
+	if event.Kind != "scheduler" {
+		rabbitMqMsg.Ack(false)
+		return
+	}
+
 	logger.Info("event read successfully", "event", event)
 
 	n.Dispatcher.AddEvent(&event)
 
+	rabbitMqMsg.Ack(false)
 }

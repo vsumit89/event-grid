@@ -1,12 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"os"
 	"os/signal"
 	"server/internal/commons"
 	"server/internal/config"
-	db "server/internal/infrastructure/database"
 	"server/internal/infrastructure/mq"
 	"server/internal/workers"
 	"syscall"
@@ -44,15 +44,6 @@ func main() {
 		return
 	}
 
-	// connecting to the database
-	dbClient, err := db.NewDBService(cfg.DB)
-	if err != nil {
-		logger.Error("error while starting application", "error", err.Error())
-		return
-	}
-
-	logger.Info("connected to database", "database", dbClient)
-
 	mqClient := mq.NewMessageQueue(cfg.Queue)
 
 	err = mqClient.Connect()
@@ -67,16 +58,36 @@ func main() {
 		return
 	}
 
+	emailCh, err := mqClient.DeclareQueue(commons.EmailQueue)
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
 	notificationWorker := workers.NotificationScheduler{
 		Dispatcher: workers.NewEventDispatcher(workerCount, func(event *workers.NotificationEvent) {
 			logger.Info("dispatching event", "event", event)
+
+			event.Kind = "email"
+
+			jsonBody, err := json.Marshal(event)
+			if err != nil {
+				logger.Error("error while dispatching event", "error", err.Error())
+				return
+			}
+
+			err = mqClient.Publish(emailCh, jsonBody)
+			if err != nil {
+				logger.Error("error while dispatching event", "error", err.Error())
+				return
+			}
 		}),
 	}
 
 	notificationWorker.Dispatcher.Start()
 
 	go func() {
-		mqClient.Consume(ch, &notificationWorker)
+		mqClient.Consume(ch, commons.QueueName, &notificationWorker)
 	}()
 
 	forever := make(chan os.Signal, 1)
@@ -86,4 +97,10 @@ func main() {
 	<-forever
 
 	logger.Info("stopping application")
+
+	err = mqClient.Close()
+	if err != nil {
+		logger.Error("error while stopping application", "error", err.Error())
+		return
+	}
 }

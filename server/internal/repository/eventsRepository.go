@@ -22,6 +22,7 @@ type IEventsRepository interface {
 	DeleteEvent(userID, eventID uint) error
 
 	IsUserAvailableForEvent(userID uint, start, end time.Time) (bool, error)
+	GetEventByIDOnly(eventID uint) (*models.Event, error)
 }
 
 type eventsPgRepoImpl struct {
@@ -196,4 +197,14 @@ func (e *eventsPgRepoImpl) IsUserAvailableForEvent(userID uint, start, end time.
 	}
 
 	return true, nil
+}
+
+func (e *eventsPgRepoImpl) GetEventByIDOnly(eventID uint) (*models.Event, error) {
+	var event models.Event
+	err := e.db.Preload("Attendees").First(&event, eventID).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }

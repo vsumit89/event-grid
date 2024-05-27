@@ -63,6 +63,7 @@ func NewWorker(id int, callback func(event *NotificationEvent)) *Worker {
 		minHeap:  h,
 		newValue: make(chan NotificationEvent),
 		stop:     make(chan struct{}),
+		callback: callback,
 	}
 }
 
@@ -103,7 +104,7 @@ func (w *Worker) run() {
 				w.mu.Lock()
 				if w.minHeap.Len() > 0 && (*w.minHeap)[0].UnixTimestamp == minEvent.UnixTimestamp {
 					heap.Pop(w.minHeap)
-					logger.Info("event triggered", "event", minEvent)
+					w.callback(&minEvent)
 					count++
 				}
 				w.mu.Unlock()

@@ -9,8 +9,9 @@ import (
 type IMessageQueue interface {
 	Connect() error
 	DeclareQueue(queueName string) (*amqp091.Channel, error)
+	DeclareQueueWithExchange(exchangeName, queueName string) (*amqp091.Channel, error)
 	Publish(ch *amqp091.Channel, body []byte) error
-	Consume(ch *amqp091.Channel, handler IMessageHandler)
+	Consume(ch *amqp091.Channel, queueName string, handler IMessageHandler)
 	Close() error
 }
 

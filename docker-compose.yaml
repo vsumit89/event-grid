@@ -37,7 +37,19 @@ services:
   scheduler:
     build:
       context: ./server
-      dockerfile: ./docker/Dockerfile.worker
+      dockerfile: ./docker/Dockerfile.scheduler
+    depends_on:
+      - rabbitmq
+    volumes:
+      - ./server:/app
+    networks:
+      - eventgrid
+
+
+  messenger:
+    build:
+      context: ./server
+      dockerfile: ./docker/Dockerfile.messenger
     depends_on:
       - rabbitmq
     volumes:

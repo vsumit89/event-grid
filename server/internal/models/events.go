@@ -14,8 +14,3 @@ type Event struct {
 	Attendees   []User    `gorm:"many2many:event_attendees" json:"attendees,omitempty"`
 	MeetingURL  string    `json:"meeting_url,omitempty"`
 }
-
-// type EventAttendees struct {
-// 	EventID uint
-// 	UserID  uint
-// }
