@@ -86,11 +86,10 @@ export const createEvent = async (data) => {
                 responseData.error.message || 'Something went wrong'
             )
         }
+        return responseData
     } catch (error) {
         throw new Error(error)
     }
-
-    return responseData
 }
 
 export const updateEvent = async (id, data) => {
@@ -114,9 +113,8 @@ export const updateEvent = async (id, data) => {
                 responseData.error.message || 'Something went wrong'
             )
         }
+        return responseData
     } catch (error) {
         throw new Error(error)
     }
-
-    return responseData
 }
