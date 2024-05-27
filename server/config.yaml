@@ -9,6 +9,13 @@ db:
   database: "eventgrid"
   sslmode: "disable"
 
+queue:
+  protocol: "amqp"
+  host: "rabbitmq"
+  username: "rabbitmquser"
+  password: "rabbitmqpassword"
+  port: "5672"
+
 jwt:
   secret: "secret"
   ttl: 1

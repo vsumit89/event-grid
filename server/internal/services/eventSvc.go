@@ -4,6 +4,7 @@ import (
 	"errors"
 	"server/internal/commons"
 	"server/internal/handlers/dtos"
+	"server/internal/infrastructure/mq"
 	"server/internal/models"
 	"server/internal/repository"
 	"time"
@@ -25,6 +26,7 @@ type IEventSvc interface {
 type EventSvcOptions struct {
 	EventRepository repository.IEventsRepository
 	UserRepository  repository.IUserRepository
+	MQ              mq.IMessageQueue
 }
 
 type eventSvcImpl struct {

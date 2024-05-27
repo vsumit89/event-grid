@@ -4,6 +4,7 @@ type Config struct {
 	Server ServerConfig `yaml:"server"`
 	DB     *DBConfig    `yaml:"db"`
 	JWT    *JWTConfig   `yaml:"jwt"`
+	Queue  *QueueConfig `yaml:"queue"`
 }
 
 type ServerConfig struct {
@@ -23,4 +24,12 @@ type JWTConfig struct {
 	Secret string `yaml:"secret"`
 	TTL    int    `yaml:"ttl"`
 	Unit   string `yaml:"unit"`
+}
+
+type QueueConfig struct {
+	Protocol string `yaml:"protocol"`
+	Host     string `yaml:"host"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Port     string `yaml:"port"`
 }

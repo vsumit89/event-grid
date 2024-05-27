@@ -1,127 +1,89 @@
 package main
 
 import (
-	"container/heap"
-	"fmt"
-	"sync"
-	"time"
+	"flag"
+	"os"
+	"os/signal"
+	"server/internal/commons"
+	"server/internal/config"
+	db "server/internal/infrastructure/database"
+	"server/internal/infrastructure/mq"
+	"server/internal/workers"
+	"syscall"
+
+	"server/pkg/logger"
+	"strings"
 )
 
-// MinHeap represents a min-heap of integers
-type MinHeap []int64
-
-func (h MinHeap) Len() int           { return len(h) }
-func (h MinHeap) Less(i, j int) bool { return h[i] < h[j] }
-func (h MinHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
-
-func (h *MinHeap) Push(x interface{}) {
-	*h = append(*h, x.(int64))
-}
-
-func (h *MinHeap) Pop() interface{} {
-	old := *h
-	n := len(old)
-	x := old[n-1]
-	*h = old[0 : n-1]
-	return x
-}
-
-// Worker handles incoming times and waits until the minimum time is reached
-type Worker struct {
-	minHeap  *MinHeap
-	mu       sync.Mutex
-	newValue chan int64
-	stop     chan struct{}
-}
-
-func NewWorker() *Worker {
-	h := &MinHeap{}
-	heap.Init(h)
-	return &Worker{
-		minHeap:  h,
-		newValue: make(chan int64),
-		stop:     make(chan struct{}),
-	}
-}
-
-func (w *Worker) AddTime(unixTime int64) {
-	w.newValue <- unixTime
-}
-
-func (w *Worker) Stop() {
-	close(w.stop)
-}
-
-func (w *Worker) run() {
-	for {
-		w.mu.Lock()
-		for w.minHeap.Len() == 0 {
-			w.mu.Unlock()
-			select {
-			case newTime := <-w.newValue:
-				w.mu.Lock()
-				heap.Push(w.minHeap, newTime)
-				w.mu.Unlock()
-			case <-w.stop:
-				return
-			}
-			w.mu.Lock()
-		}
-		minTime := (*w.minHeap)[0]
-		w.mu.Unlock()
-
-		now := time.Now().Unix()
-		waitTime := time.Duration(minTime-now) * time.Second
-		if waitTime > 0 {
-			select {
-			case <-time.After(waitTime):
-				w.mu.Lock()
-				if w.minHeap.Len() > 0 && (*w.minHeap)[0] == minTime {
-					heap.Pop(w.minHeap)
-
-					fmt.Printf("Time reached: %v\n", minTime)
-				}
-				w.mu.Unlock()
-			case newTime := <-w.newValue:
-				w.mu.Lock()
-				heap.Push(w.minHeap, newTime)
-				w.mu.Unlock()
-			case <-w.stop:
-				return
-			}
-		} else {
-			w.mu.Lock()
-			if w.minHeap.Len() > 0 && (*w.minHeap)[0] == minTime {
-				heap.Pop(w.minHeap)
-				fmt.Printf("Time reached: %v\n", minTime)
-			}
-			w.mu.Unlock()
-		}
-	}
-}
-
 func main() {
-	worker := NewWorker()
+	// reading the l (log level) flag from the command line
+	logLevel := flag.String("l", "INFO", "log level")
 
-	ticker := time.NewTicker(time.Second)
+	// initializing the logger with the provided options
+	logger.InitLogger(
+		logger.WithLogFmt(logger.TEXT),
+		logger.WithLevel(logger.LOG_LEVEL(strings.ToUpper(*logLevel))),
+	)
+
+	// reading the c (config path) flag from the command line
+	configPath := flag.String("c", "./config.yaml", "path for reading config")
+
+	// parsing the flags
+	flag.Parse()
+
+	logger.Info("starting application")
+
+	var err error
+
+	workerCount := 4
+
+	// reading the configuration
+	cfg, err := config.InitConfig(*configPath)
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	// connecting to the database
+	dbClient, err := db.NewDBService(cfg.DB)
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	logger.Info("connected to database", "database", dbClient)
+
+	mqClient := mq.NewMessageQueue(cfg.Queue)
+
+	err = mqClient.Connect()
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	ch, err := mqClient.DeclareQueue(commons.QueueName)
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	notificationWorker := workers.NotificationScheduler{
+		Dispatcher: workers.NewEventDispatcher(workerCount, func(event *workers.NotificationEvent) {
+			logger.Info("dispatching event", "event", event)
+		}),
+	}
+
+	notificationWorker.Dispatcher.Start()
 
 	go func() {
-		count := 0
-		for {
-			<-ticker.C
-			count = count + 1
-			fmt.Println("this is count", count)
-			// worker.AddTime(time.Now().Unix())
-		}
+		mqClient.Consume(ch, &notificationWorker)
 	}()
 
-	go worker.run()
+	forever := make(chan os.Signal, 1)
 
-	// Example usage
-	worker.AddTime(time.Now().Add(12 * time.Second).Unix())
-	worker.AddTime(time.Now().Add(5 * time.Second).Unix())
-	worker.AddTime(time.Now().Add(3 * time.Second).Unix())
+	signal.Notify(forever, os.Interrupt, syscall.SIGTERM)
 
-	time.Sleep(20 * time.Second)
-	worker.Stop()
+	<-forever
+
+	logger.Info("stopping application")
 }

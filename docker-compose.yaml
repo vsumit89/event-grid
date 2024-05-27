@@ -34,7 +34,7 @@ services:
       - eventgrid
 
 
-  notification-worker:
+  scheduler:
     build:
       context: ./server
       dockerfile: ./docker/Dockerfile.worker

@@ -9,4 +9,4 @@ RUN go mod download
 
 RUN go install github.com/githubnemo/CompileDaemon@latest
 
-ENTRYPOINT CompileDaemon -exclude-dir=.git -exclude-dir=docs --build="go build -o worker cmd/notification-worker/main.go" --command="./worker"
+ENTRYPOINT CompileDaemon -exclude-dir=.git -exclude-dir=docs --build="go build -o worker cmd/scheduler/main.go" --command="./worker"

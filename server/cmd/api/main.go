@@ -11,6 +11,7 @@ import (
 	"server/internal/config"
 	"server/internal/handlers"
 	db "server/internal/infrastructure/database"
+	"server/internal/infrastructure/mq"
 	"server/internal/infrastructure/transport"
 	"server/internal/repository"
 	"server/internal/services"
@@ -61,6 +62,20 @@ func main() {
 		return
 	}
 
+	mqClient := mq.NewMessageQueue(cfg.Queue)
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	err = mqClient.Connect()
+	if err != nil {
+		logger.Error("error while starting application", "error", err.Error())
+		return
+	}
+
+	logger.Info("successfully connected to the message queue")
+
 	logger.Info("successfully migrated the database")
 
 	jwtSvc := commons.NewJWTService(cfg.JWT)
@@ -77,6 +92,7 @@ func main() {
 	eventSvc := services.NewEventSvc(&services.EventSvcOptions{
 		EventRepository: eventRepoSvc,
 		UserRepository:  userRepoSvc,
+		MQ:              mqClient,
 	})
 
 	// deps contains the dependencies for the handlers

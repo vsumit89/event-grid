@@ -33,4 +33,10 @@ run-frontend: web start-frontend
 frontend-build:
 	cd web; ${NPMRUN} build
 
+restart-scheduler: 
+	${DCOMPOSE} restart scheduler
+
+restart-api:
+	${DCOMPOSE} restart eventgrid-api
+
 .PHONY: all build up down clean
