@@ -31,6 +31,6 @@ run-frontend: web start-frontend
 
 
 frontend-build:
-	${NPMRUN} build
+	cd web; ${NPMRUN} build
 
 .PHONY: all build up down clean
