@@ -8,7 +8,6 @@ import (
 	"server/internal/commons"
 	"server/internal/mocks"
 	"server/internal/models"
-	"server/internal/services"
 	"server/pkg/logger"
 	"testing"
 	"time"
@@ -46,7 +45,7 @@ func TestGetEvents(t *testing.T) {
 		endTime, _ := time.Parse("2006-01-02", "2023-05-29")
 		endTime = endTime.Add(24 * time.Hour)
 
-		mockEventSvc.MockGetEvents = func(userID uint, filters services.EventFilters) ([]models.Event, error) {
+		mockEventSvc.MockGetEvents = func(userID uint, filters commons.EventFilters) ([]models.Event, error) {
 			return []models.Event{
 				{
 					Base: models.Base{
@@ -144,7 +143,7 @@ func TestGetEvents(t *testing.T) {
 			t.Error(err)
 		}
 
-		mockEventSvc.MockGetEvents = func(userID uint, filters services.EventFilters) ([]models.Event, error) {
+		mockEventSvc.MockGetEvents = func(userID uint, filters commons.EventFilters) ([]models.Event, error) {
 			return nil, errors.New("service error")
 		}
 

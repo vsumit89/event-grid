@@ -2,8 +2,8 @@ package eventHandlers
 
 import (
 	"net/http"
+	"server/internal/commons"
 	"server/internal/handlers/middlewares"
-	"server/internal/services"
 	"server/pkg/utils"
 	"time"
 )
@@ -44,7 +44,7 @@ func (h *Handler) getEvents(w http.ResponseWriter, r *http.Request) {
 		endTime = endTime.Add(24 * time.Hour)
 	}
 
-	events, err := h.eventSvc.GetEvents(user.UserID, services.EventFilters{StartTime: startTime, EndTime: endTime})
+	events, err := h.eventSvc.GetEvents(user.UserID, commons.EventFilters{StartTime: startTime, EndTime: endTime})
 	if err != nil {
 		utils.SendError(w, http.StatusInternalServerError, err)
 		return

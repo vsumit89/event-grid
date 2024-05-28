@@ -22,7 +22,7 @@ type IEventSvc interface {
 	CreateEvent(userID uint, eventDetails *dtos.EventDTO) (*models.Event, error)
 	GetEventByID(userID, eventID uint) (*models.Event, error)
 	DeleteEvent(userID, eventID uint) error
-	GetEvents(userID uint, filters EventFilters) ([]models.Event, error)
+	GetEvents(userID uint, filters commons.EventFilters) ([]models.Event, error)
 	UpdateEvent(userID, eventID uint, eventDetails *dtos.EventDTO) (*models.Event, error)
 }
 
@@ -136,7 +136,7 @@ func (e *eventSvcImpl) DeleteEvent(userID, eventID uint) error {
 	return e.EventRepository.DeleteEvent(userID, eventID)
 }
 
-func (e *eventSvcImpl) GetEvents(userID uint, filters EventFilters) ([]models.Event, error) {
+func (e *eventSvcImpl) GetEvents(userID uint, filters commons.EventFilters) ([]models.Event, error) {
 	events, err := e.EventRepository.GetEventsInRange(userID, filters.StartTime, filters.EndTime)
 	if err != nil {
 		return nil, err
