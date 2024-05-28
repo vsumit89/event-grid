@@ -5,6 +5,7 @@ import (
 	"server/internal/config"
 	"server/internal/models"
 	"server/pkg/logger"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,12 +33,24 @@ func (p *pgDBImpl) Connect(cfg *config.DBConfig) error {
 	// building the db url
 	dbUrl := p.getDbUrl(cfg)
 
-	// connecting to the database
-	client, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
-		Logger: gormLogger.Default.LogMode(gormLogger.Info),
-	})
-	if err != nil {
-		return err
+	i := 0
+	var client *gorm.DB
+	var err error
+
+	for {
+		client, err = gorm.Open(postgres.Open(dbUrl), &gorm.Config{
+			Logger: gormLogger.Default.LogMode(gormLogger.Info),
+		})
+		if err != nil {
+			if i >= 3 {
+				return err
+			}
+		} else {
+			break
+		}
+
+		time.Sleep(5 * time.Second)
+		i++
 	}
 
 	// setting the client
