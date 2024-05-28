@@ -83,4 +83,21 @@ func main() {
 
 	<-forever
 
+	// close the database connection
+	err = dbClient.Close()
+	if err != nil {
+		logger.Error("error while closing the database connection", "error", err.Error())
+		return
+	}
+
+	logger.Info("successfully closed the database connection")
+
+	// close the message queue connection
+	err = mqClient.Close()
+	if err != nil {
+		logger.Error("error while closing the message queue connection", "error", err.Error())
+		return
+	}
+
+	logger.Info("exiting application")
 }
