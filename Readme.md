@@ -15,6 +15,8 @@ A calendar application built in React and Go which helps in event management
 - Message Broker: RabbitMQ
     - In terms of message brokers, I am most comfortable with rabbitmq.
 
+## Demo Link
+[Link](https://www.loom.com/share/f8bfa09c5d6c4324809e0d8d2499aecb?sid=b40369d3-d0fb-4f8a-a243-b6435e688046)
 
 ## Backend Architecture 
 [Link](https://github.com/vsumit89/event-grid/tree/main/server)
