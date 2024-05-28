@@ -67,8 +67,6 @@ func TestGetEvents(t *testing.T) {
 		if status := rr.Code; status != http.StatusOK {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusOK)
 		}
-
-		// Add additional assertions for the response body, if needed
 	})
 
 	t.Run("TestGetEvents_Unauthorized", func(t *testing.T) {
@@ -86,7 +84,6 @@ func TestGetEvents(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusUnauthorized)
 		}
 
-		// Add additional assertions for the response body, if needed
 	})
 
 	t.Run("TestGetEvents_InvalidStartDate", func(t *testing.T) {
@@ -109,8 +106,6 @@ func TestGetEvents(t *testing.T) {
 		if status := rr.Code; status != http.StatusBadRequest {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusBadRequest)
 		}
-
-		// Add additional assertions for the response body, if needed
 	})
 
 	t.Run("TestGetEvents_InvalidEndDate", func(t *testing.T) {
@@ -134,7 +129,6 @@ func TestGetEvents(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusBadRequest)
 		}
 
-		// Add additional assertions for the response body, if needed
 	})
 
 	t.Run("TestGetEvents_ServiceError", func(t *testing.T) {
@@ -162,6 +156,5 @@ func TestGetEvents(t *testing.T) {
 			t.Errorf("handler returned wrong status code: got %v want %v", status, http.StatusInternalServerError)
 		}
 
-		// Add additional assertions for the response body, if needed
 	})
 }
