@@ -20,18 +20,6 @@ down:
 clean:
 	$(DCOMPOSE) down --rmi all -v
 
-web:
-	cd web
-
-start-frontend:
-	${NPMRUN} dev
-
-
-run-frontend: web start-frontend
-
-
-frontend-build:
-	cd web; ${NPMRUN} build
 
 restart-scheduler: 
 	${DCOMPOSE} restart scheduler
