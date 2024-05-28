@@ -26,6 +26,9 @@ A calendar application built in React and Go which helps in event management
 
 - Run `make build` to bulid the project and run `make up` to run all backend services and it's dependency
 
-- Go to `web` and run `npm run dev` for running the frontend
+- Go to `web` folder 
+    - add `.env.local`, for reference see `web/.env.local.example
+    - install the dependences by running `npm i`
+    - run `npm run dev` for running the frontend
 
 
