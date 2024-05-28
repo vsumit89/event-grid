@@ -18,3 +18,12 @@ A calendar application built in React and Go which helps in event management
 
 ## Backend Architecture 
 [Link](https://github.com/vsumit89/event-grid/tree/main/server)
+
+## Steps to run the project:
+- Update the config file at server/config.yaml and web/.env/.local
+
+- Run `make build` to bulid the project and run `make up` to run all backend services and it's dependency
+
+- Go to `web` and run `npm run dev` for running the frontend
+
+
